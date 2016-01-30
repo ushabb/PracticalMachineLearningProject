@@ -1,0 +1,124 @@
+---
+title: "Practical Machine Learning Project"
+author: "Usha B Biradar"
+date: "January 30, 2016"
+output: html_document
+---
+
+**Background**
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways.
+
+**Data**
+
+The training data for this project are available here:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+ 
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har.
+
+**Data Processing** 
+
+```{r download, echo =TRUE}
+# Download training and testing data
+if (!file.exists("./pml-training.csv")){
+    fileURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+      download.file(fileURL, "./pml-training.csv", method="libcurl")
+}
+
+if (!file.exists("./pml-testing.csv")){
+    fileURL <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+      download.file(fileURL, "./pml-testing.csv", method="libcurl")
+    }
+```
+
+Reading the data after ignoring NAs, invalid and empty values.
+```{r read, echo=TRUE}
+training <- read.csv("pml-training.csv", na.strings = c("NA", "#DIV/0!", ""))
+testing  <- read.csv("pml-testing.csv",  na.strings = c("NA", "#DIV/0!", ""))
+```
+Summary of the data 
+```{r summary, echo=TRUE}
+str(training)
+
+```
+
+It is evident that the data has 19622 records with 160 variables. The variable to be predicted is classe, and each individual record is attributed to one of the five classes A to E. 
+
+**Training and Testing Datasets** 
+```{r seed, echo=TRUE}
+set.seed(0)
+library(caret)
+```
+
+
+Cleaning the original testing and training sets by removing all invalid values 
+```{r clean, echo=TRUE}
+trainingClean  <- apply(!is.na(training), 2, sum) > 19621  # which is the number of observations
+training = training[, trainingClean]
+
+testingClean  <- apply(!is.na(testing), 2, sum) > 19  # which is the number of observations
+testing = testing[, testingClean]
+testing = testing[-c(1:7)]
+dim(testing)
+dim(testing)
+```
+Splitting the dataset into traing and testing subsets
+```{r splitData, echo=TRUE}
+inTrain = createDataPartition(y=training$classe, p=0.7, list=FALSE)
+train = training[inTrain,]
+test = training[-inTrain,]
+dim(train)
+
+```
+
+Ignoring the first 7 columns
+```{r clean3, echo=TRUE}
+train = train[,-c(1:7)]
+test = test[, -c(1:7)]
+```
+
+**Model Builiding**
+Using Random Forests to build a model and saving the model
+```{r createSave, echo=TRUE}
+library(randomForest)
+set.seed(1)
+model = train(classe~., method="rf", data=train)
+saveRDS(model, "assignmentrfmodel.RDS")
+model = readRDS("assignmentrfmodel.RDS")
+```
+**Cross Validation** 
+In random forests, although there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error, a simple splitting is still done and the accuracy of the model is tested on the test set
+```{r CrossVal, echo=TRUE}
+validate <- predict(model, newdata=test)
+confusionMatrix <- confusionMatrix(validate, test$classe)
+confusionMatrix
+```
+**Out of sample error** 
+Prediction on the test set using the rf model 
+```{r Error, echo=TRUE}
+misClass = function(values, predicted) {
+  sum(predicted != values) / length(values)
+}
+OutOfSamplErrRate = misClass(test$classe, validate)
+OutOfSamplErrRate
+```
+**Working on the Actual Testing Set** 
+Prediction on the test set using the rf model 
+```{r QuizTestingSet, echo=TRUE}
+QuizPredictions20 <- predict(model, newdata=testing)
+testing$classe <- QuizPredictions20
+```
+Accuracy Statistics of the model on the original testing data
+```{r, echo=TRUE}
+validateTest <- predict(model, newdata=testing)
+confusionMatrixTest <- confusionMatrix(validateTest, testing$classe)
+confusionMatrixTest
+```
+
+**Conclusion**
+Random forests were used to build a model to predict the classe (either A, B, C, D or E) for 20 observations quite accurately(Balanced Accuracy for all five classe A,B,C,D and E is 1.00 on the testing data from pml-testing.csv).
