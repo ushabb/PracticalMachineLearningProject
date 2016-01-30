@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Practicalmachinelearningproject by ushabb</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Practicalmachinelearningproject</h1>
+      <h2 class="project-tagline">Practical Machine Learning Project</h2>
+      <a href="https://github.com/ushabb/PracticalMachineLearningProject" class="btn">View on GitHub</a>
+      <a href="https://github.com/ushabb/PracticalMachineLearningProject/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/ushabb/PracticalMachineLearningProject/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p>
+</p>
+
+
+
+<p>
+</p>
+
+
+
+
+
+
+
+code{white-space: pre;}
+
+<p></p>
+
+
+
+
+  pre:not([class]) {
+    background-color: white;
+  }
+
+
+
+
+<p></p>
+
+<p></p>
+
+
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img { 
+  max-width:100%; 
+  height: auto; 
+}
+
+
+<div>
+
+
+<div id="header">
+<h1>
+<a id="practical-machine-learning-project" class="anchor" href="#practical-machine-learning-project" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Practical Machine Learning Project</h1>
+<h4>
+<a id="usha-b-biradar" class="anchor" href="#usha-b-biradar" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><em>Usha B Biradar</em>
+</h4>
+<h4>
+<a id="january-30-2016" class="anchor" href="#january-30-2016" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><em>January 30, 2016</em>
+</h4>
+</div>
+
+<p><strong>Background</strong></p>
+
+<p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways.</p>
+
+<p><strong>Data</strong></p>
+
+<p>The training data for this project are available here:</p>
+
+<p><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv</a></p>
+
+<p>The test data are available here:</p>
+
+<p><a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a></p>
+
+<p>The data for this project come from this source: <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>.</p>
+
+<p><strong>Data Processing</strong></p>
+
+<pre><code># Download training and testing data
+if (!file.exists("./pml-training.csv")){
+    fileURL &lt;- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+      download.file(fileURL, "./pml-training.csv", method="libcurl")
+}
+
+if (!file.exists("./pml-testing.csv")){
+    fileURL &lt;- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+      download.file(fileURL, "./pml-testing.csv", method="libcurl")
+    }</code></pre>
+
+<p>Reading the data after ignoring NAs, invalid and empty values.</p>
+
+<pre><code>training &lt;- read.csv("pml-training.csv", na.strings = c("NA", "#DIV/0!", ""))
+testing  &lt;- read.csv("pml-testing.csv",  na.strings = c("NA", "#DIV/0!", ""))</code></pre>
+
+<p>Summary of the data</p>
+
+<pre><code>str(training)</code></pre>
+
+<pre><code>## 'data.frame':    19622 obs. of  160 variables:
+##  $ X                       : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ user_name               : Factor w/ 6 levels "adelmo","carlitos",..: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ raw_timestamp_part_1    : int  1323084231 1323084231 1323084231 1323084232 1323084232 1323084232 1323084232 1323084232 1323084232 1323084232 ...
+##  $ raw_timestamp_part_2    : int  788290 808298 820366 120339 196328 304277 368296 440390 484323 484434 ...
+##  $ cvtd_timestamp          : Factor w/ 20 levels "02/12/2011 13:32",..: 9 9 9 9 9 9 9 9 9 9 ...
+##  $ new_window              : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ num_window              : int  11 11 11 12 12 12 12 12 12 12 ...
+##  $ roll_belt               : num  1.41 1.41 1.42 1.48 1.48 1.45 1.42 1.42 1.43 1.45 ...
+##  $ pitch_belt              : num  8.07 8.07 8.07 8.05 8.07 8.06 8.09 8.13 8.16 8.17 ...
+##  $ yaw_belt                : num  -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 ...
+##  $ total_accel_belt        : int  3 3 3 3 3 3 3 3 3 3 ...
+##  $ kurtosis_roll_belt      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_picth_belt     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_yaw_belt       : logi  NA NA NA NA NA NA ...
+##  $ skewness_roll_belt      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_roll_belt.1    : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_yaw_belt       : logi  NA NA NA NA NA NA ...
+##  $ max_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_belt          : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_belt          : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_roll_belt     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_pitch_belt    : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_yaw_belt      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_total_accel_belt    : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_roll_belt        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_pitch_belt          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_pitch_belt       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_pitch_belt          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_yaw_belt         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ gyros_belt_x            : num  0 0.02 0 0.02 0.02 0.02 0.02 0.02 0.02 0.03 ...
+##  $ gyros_belt_y            : num  0 0 0 0 0.02 0 0 0 0 0 ...
+##  $ gyros_belt_z            : num  -0.02 -0.02 -0.02 -0.03 -0.02 -0.02 -0.02 -0.02 -0.02 0 ...
+##  $ accel_belt_x            : int  -21 -22 -20 -22 -21 -21 -22 -22 -20 -21 ...
+##  $ accel_belt_y            : int  4 4 5 3 2 4 3 4 2 4 ...
+##  $ accel_belt_z            : int  22 22 23 21 24 21 21 21 24 22 ...
+##  $ magnet_belt_x           : int  -3 -7 -2 -6 -6 0 -4 -2 1 -3 ...
+##  $ magnet_belt_y           : int  599 608 600 604 600 603 599 603 602 609 ...
+##  $ magnet_belt_z           : int  -313 -311 -305 -310 -302 -312 -311 -313 -312 -308 ...
+##  $ roll_arm                : num  -128 -128 -128 -128 -128 -128 -128 -128 -128 -128 ...
+##  $ pitch_arm               : num  22.5 22.5 22.5 22.1 22.1 22 21.9 21.8 21.7 21.6 ...
+##  $ yaw_arm                 : num  -161 -161 -161 -161 -161 -161 -161 -161 -161 -161 ...
+##  $ total_accel_arm         : int  34 34 34 34 34 34 34 34 34 34 ...
+##  $ var_accel_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_roll_arm         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_pitch_arm        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_yaw_arm             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_yaw_arm          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_yaw_arm             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ gyros_arm_x             : num  0 0.02 0.02 0.02 0 0.02 0 0.02 0.02 0.02 ...
+##  $ gyros_arm_y             : num  0 -0.02 -0.02 -0.03 -0.03 -0.03 -0.03 -0.02 -0.03 -0.03 ...
+##  $ gyros_arm_z             : num  -0.02 -0.02 -0.02 0.02 0 0 0 0 -0.02 -0.02 ...
+##  $ accel_arm_x             : int  -288 -290 -289 -289 -289 -289 -289 -289 -288 -288 ...
+##  $ accel_arm_y             : int  109 110 110 111 111 111 111 111 109 110 ...
+##  $ accel_arm_z             : int  -123 -125 -126 -123 -123 -122 -125 -124 -122 -124 ...
+##  $ magnet_arm_x            : int  -368 -369 -368 -372 -374 -369 -373 -372 -369 -376 ...
+##  $ magnet_arm_y            : int  337 337 344 344 337 342 336 338 341 334 ...
+##  $ magnet_arm_z            : int  516 513 513 512 506 513 509 510 518 516 ...
+##  $ kurtosis_roll_arm       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_picth_arm      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_yaw_arm        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_roll_arm       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_pitch_arm      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_yaw_arm        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_arm             : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_arm             : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_roll_arm      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_pitch_arm     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_yaw_arm       : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ roll_dumbbell           : num  13.1 13.1 12.9 13.4 13.4 ...
+##  $ pitch_dumbbell          : num  -70.5 -70.6 -70.3 -70.4 -70.4 ...
+##  $ yaw_dumbbell            : num  -84.9 -84.7 -85.1 -84.9 -84.9 ...
+##  $ kurtosis_roll_dumbbell  : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_picth_dumbbell : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_yaw_dumbbell   : logi  NA NA NA NA NA NA ...
+##  $ skewness_roll_dumbbell  : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_pitch_dumbbell : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_yaw_dumbbell   : logi  NA NA NA NA NA NA ...
+##  $ max_roll_dumbbell       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_dumbbell      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_dumbbell        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_roll_dumbbell       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_dumbbell      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_dumbbell        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_roll_dumbbell : num  NA NA NA NA NA NA NA NA NA NA ...
+##   [list output truncated]</code></pre>
+
+<p>It is evident that the data has 19622 records with 160 variables. The variable to be predicted is classe, and each individual record is attributed to one of the five classes A to E.</p>
+
+<p><strong>Training and Testing Datasets</strong></p>
+
+<pre><code>set.seed(0)
+library(caret)</code></pre>
+
+<pre><code>## Warning: package 'caret' was built under R version 3.2.3</code></pre>
+
+<pre><code>## Loading required package: lattice</code></pre>
+
+<pre><code>## Warning: package 'lattice' was built under R version 3.2.2</code></pre>
+
+<pre><code>## Loading required package: ggplot2</code></pre>
+
+<pre><code>## Warning: package 'ggplot2' was built under R version 3.2.2</code></pre>
+
+<p>Cleaning the original testing and training sets by removing all invalid values</p>
+
+<pre><code>trainingClean  &lt;- apply(!is.na(training), 2, sum) &gt; 19621  
+training = training[, trainingClean]
+
+testingClean  &lt;- apply(!is.na(testing), 2, sum) &gt; 19  
+testing = testing[, testingClean]
+testing = testing[-c(1:7)]
+dim(testing)</code></pre>
+
+<pre><code>## [1] 20 53</code></pre>
+
+<pre><code>dim(testing)</code></pre>
+
+<pre><code>## [1] 20 53</code></pre>
+
+<p>Splitting the dataset into traing and testing subsets</p>
+
+<pre><code>inTrain = createDataPartition(y=training$classe, p=0.7, list=FALSE)
+train = training[inTrain,]
+test = training[-inTrain,]
+dim(train)</code></pre>
+
+<pre><code>## [1] 13737    60</code></pre>
+
+<p>Ignoring the first 7 columns</p>
+
+<pre><code>train = train[,-c(1:7)]
+test = test[, -c(1:7)]</code></pre>
+
+<p><strong>Model Builiding</strong> Using Random Forests to build a model and saving the model</p>
+
+<pre><code>library(randomForest)</code></pre>
+
+<pre><code>## Warning: package 'randomForest' was built under R version 3.2.3</code></pre>
+
+<pre><code>## randomForest 4.6-12
+## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+
+<pre><code>set.seed(1)
+model = train(classe~., method="rf", data=train)
+saveRDS(model, "assignmentrfmodel.RDS")
+model = readRDS("assignmentrfmodel.RDS")</code></pre>
+
+<p><strong>Cross Validation</strong></p>
+
+<p> In random forests, although there is no need for cross-validation or a separate test set to get an unbiased estimate of the test set error, a simple splitting is still done and the accuracy of the model is tested on the test set</p>
+
+<pre><code>validate &lt;- predict(model, newdata=test)
+confusionMatrix &lt;- confusionMatrix(validate, test$classe)
+confusionMatrix</code></pre>
+
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1668    7    0    0    0
+##          B    3 1128    3    0    0
+##          C    2    4 1021    5    1
+##          D    0    0    2  957    1
+##          E    1    0    0    2 1080
+## 
+## Overall Statistics
+##                                           
+##                Accuracy : 0.9947          
+##                  95% CI : (0.9925, 0.9964)
+##     No Information Rate : 0.2845          
+##     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+##                                           
+##                   Kappa : 0.9933          
+##  Mcnemar's Test P-Value : NA              
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity            0.9964   0.9903   0.9951   0.9927   0.9982
+## Specificity            0.9983   0.9987   0.9975   0.9994   0.9994
+## Pos Pred Value         0.9958   0.9947   0.9884   0.9969   0.9972
+## Neg Pred Value         0.9986   0.9977   0.9990   0.9986   0.9996
+## Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+## Detection Rate         0.2834   0.1917   0.1735   0.1626   0.1835
+## Detection Prevalence   0.2846   0.1927   0.1755   0.1631   0.1840
+## Balanced Accuracy      0.9974   0.9945   0.9963   0.9961   0.9988</code></pre>
+
+<p><strong>Out of sample error</strong></p>
+
+<p> Prediction on the test set using the rf model</p>
+
+<pre><code>misClass = function(values, predicted) {
+  sum(predicted != values) / length(values)
+}
+OutOfSamplErrRate = misClass(test$classe, validate)
+OutOfSamplErrRate</code></pre>
+
+<pre><code>## [1] 0.002548853</code></pre>
+
+<p><strong>Working on the Actual Testing Set</strong></p> 
+
+<p>Prediction on the testing set(pml-testing.csv) using the rf model</p>
+
+<pre><code>QuizPredictions20 &lt;- predict(model, newdata=testing)
+testing$classe &lt;- QuizPredictions20</code></pre>
+
+<pre><code>## [1] B A B A A E D B A A B C B A E E A B B B
+## Levels: A B C D E</code></pre>
+
+<p>Accuracy Statistics of the model on the original testing data</p>
+
+<pre><code>validateTest &lt;- predict(model, newdata=testing)
+confusionMatrixTest &lt;- confusionMatrix(validateTest, testing$classe)
+confusionMatrix</code></pre>
+
+<pre><code>## Confusion Matrix and Statistics
+##
+##          Reference
+## Prediction A B C D E
+##         A 7 0 0 0 0
+##         B 0 8 0 0 0
+##         C 0 0 1 0 0
+##         D 0 0 0 1 0
+##         E 0 0 0 0 3
+##
+## Overall Statistics
+##                                     
+##               Accuracy : 1          
+##                 95% CI : (0.8316, 1)
+##    No Information Rate : 0.4        
+##    P-Value [Acc &gt; NIR] : 1.1e-08    
+##                                     
+##                  Kappa : 1          
+## Mcnemar's Test P-Value : NA         
+##
+## Statistics by Class:
+##
+##                     Class: A Class: B Class: C Class: D Class: E
+## Sensitivity              1.00      1.0     1.00     1.00     1.00
+## Specificity              1.00      1.0     1.00     1.00     1.00
+## Pos Pred Value           1.00      1.0     1.00     1.00     1.00
+## Neg Pred Value           1.00      1.0     1.00     1.00     1.00
+## Prevalence               0.35      0.4     0.05     0.05     0.15
+## Detection Rate           0.35      0.4     0.05     0.05     0.15
+## Detection Prevalence     0.35      0.4     0.05     0.05     0.15
+## Balanced Accuracy        1.00      1.0     1.00     1.00     1.00</code></pre>
+
+<p><strong>Conclusion</strong></p>
+
+<p> Random forests were used to build a model to predict the classe (either A, B, C, D or E) for 20 observations quite accurately(Balanced Accuracy for all five classe A,B,C,D and E is 1.00 on the testing data from pml-testing.csv).</p>
+
+<p></p>
+</div>
+
+
+
+
+
+
+
+<p>
+</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/ushabb/PracticalMachineLearningProject">Practicalmachinelearningproject</a> is maintained by <a href="https://github.com/ushabb">ushabb</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
